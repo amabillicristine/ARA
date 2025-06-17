@@ -1,0 +1,6 @@
+{
+  "name": "Current Reality Tree Builder",
+  "description": "A web application for building Current Reality Trees (CRT) based on the Theory of Constraints (TOC). Allows users to create nodes for Undesirable Effects (UDEs) and Causes, connect them, and optionally use Gemini AI to suggest root causes for UDEs.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}
