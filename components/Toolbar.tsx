@@ -1,7 +1,8 @@
 
+
 import React from 'react';
 import { NodeType } from '../types';
-import { PlusIcon, BrainIcon, DownloadIcon } from './icons';
+import { PlusIcon, BrainIcon, DownloadIcon, LightbulbIcon } from './icons';
 
 interface ToolbarProps {
   onAddNode: (type: NodeType) => void;
@@ -9,8 +10,10 @@ interface ToolbarProps {
   hasUDEs: boolean;
   isAnalyzing: boolean;
   selectedNodeId: string | null;
-  onOpenPdfConfigModal: () => void; // Changed from onDownloadPdf
+  onOpenPdfConfigModal: () => void;
   hasAnyNodes: boolean;
+  onGetSimpleExplanation: () => void; 
+  isGettingExplanation: boolean; 
 }
 
 const Toolbar: React.FC<ToolbarProps> = ({ 
@@ -19,8 +22,10 @@ const Toolbar: React.FC<ToolbarProps> = ({
   hasUDEs, 
   isAnalyzing, 
   selectedNodeId,
-  onOpenPdfConfigModal, // Changed from onDownloadPdf
-  hasAnyNodes
+  onOpenPdfConfigModal,
+  hasAnyNodes,
+  onGetSimpleExplanation,
+  isGettingExplanation,
 }) => {
   const apiKeyExists = !!process.env.API_KEY;
 
@@ -55,11 +60,22 @@ const Toolbar: React.FC<ToolbarProps> = ({
           {isAnalyzing ? "Analisando..." : "Analisar EIs com IA"}
         </button>
       )}
+       {apiKeyExists && (
+        <button
+          onClick={onGetSimpleExplanation}
+          disabled={isGettingExplanation}
+          className="flex items-center px-4 py-2 bg-green-500 hover:bg-green-600 rounded-md text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed mb-2 sm:mb-0"
+          title="Obter uma explicação simples da IA"
+        >
+          <LightbulbIcon className="w-5 h-5 mr-2" />
+          {isGettingExplanation ? "Explicando..." : "Explicação da IA"}
+        </button>
+      )}
       {!apiKeyExists && (
          <span className="text-xs text-yellow-400 italic mb-2 sm:mb-0">A funcionalidade de IA está desabilitada. Configure a API_KEY.</span>
       )}
       <button
-        onClick={onOpenPdfConfigModal} // Changed from onDownloadPdf
+        onClick={onOpenPdfConfigModal}
         disabled={!hasAnyNodes}
         className="flex items-center px-4 py-2 bg-cyan-500 hover:bg-cyan-600 rounded-md text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed mb-2 sm:mb-0"
         title={!hasAnyNodes ? "Adicione nós ao diagrama para habilitar o download" : "Configurar e Baixar Árvore como PDF"}
