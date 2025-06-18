@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import { GEMINI_MODEL_NAME } from '../constants';
 
@@ -36,5 +37,35 @@ ${udeTexts.join("\n")}
   } catch (error) {
     console.error("Error calling Gemini API:", error);
     throw error; // Re-throw for the caller to handle
+  }
+};
+
+export const getSimpleAiExplanation = async (question: string): Promise<string> => {
+  if (!ai) {
+    // This case should ideally be prevented by UI disabling the feature if API_KEY is not set.
+    return "Cliente Gemini AI não inicializado. A API_KEY pode estar ausente.";
+  }
+  if (!question.trim()) {
+    return "Por favor, forneça uma pergunta.";
+  }
+
+  const prompt = question;
+
+  try {
+    const response: GenerateContentResponse = await ai.models.generateContent({
+      model: GEMINI_MODEL_NAME,
+      contents: prompt,
+    });
+    
+    const textResponse = response.text;
+    if (!textResponse) return "A IA não forneceu uma resposta.";
+
+    return textResponse.trim();
+  } catch (error) {
+    console.error("Error calling Gemini API for simple explanation:", error);
+    if (error instanceof Error) {
+        return `Erro da IA: ${error.message}`;
+    }
+    return "Ocorreu um erro desconhecido ao buscar a explicação da IA.";
   }
 };
