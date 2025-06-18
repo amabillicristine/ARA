@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 export const PlusIcon: React.FC<{className?: string}> = ({ className }) => (
@@ -45,5 +46,11 @@ export const DownloadIcon: React.FC<{className?: string}> = ({ className }) => (
 export const PinIcon: React.FC<{className?: string}> = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className || "w-5 h-5"}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 3.75V16.5L12 14.25 7.5 16.5V3.75m9 0H12H7.5M7.5 3.75C7.5 2.784 8.284 2 9.25 2h5.5C15.716 2 16.5 2.784 16.5 3.75M4.5 20.25h15A2.25 2.25 0 0 0 21.75 18v0A2.25 2.25 0 0 0 19.5 15.75h-15A2.25 2.25 0 0 0 2.25 18v0A2.25 2.25 0 0 0 4.5 20.25Z" />
+  </svg>
+);
+
+export const LightbulbIcon: React.FC<{className?: string}> = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className || "w-6 h-6"}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.355a7.5 7.5 0 0 1-3 0m3 0a7.5 7.5 0 0 0-3 0M12 9.75A2.25 2.25 0 0 0 9.75 12h4.5A2.25 2.25 0 0 0 12 9.75Zm0 0V9M9.75 12a2.25 2.25 0 0 1 2.25-2.25M12 9.75a2.25 2.25 0 0 0-2.25 2.25m0 0H6.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125h9.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H9.75Z" />
   </svg>
 );
