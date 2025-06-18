@@ -1,10 +1,11 @@
 
+
 import React, { useState, useCallback, useEffect } from 'react';
 import { Node, Edge, NodeType } from './types';
 import { NODE_WIDTH, NODE_HEIGHT, MIN_NODE_WIDTH, MIN_NODE_HEIGHT } from './constants';
 import Toolbar from './components/Toolbar';
 import CurrentRealityTree from './components/CurrentRealityTree';
-import { analyzeUDEsForRootCauses } from './services/geminiService';
+import { analyzeUDEsForRootCauses, getSimpleAiExplanation } from './services/geminiService';
 import { CloseIcon } from './components/icons';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -31,6 +32,11 @@ const App: React.FC = () => {
     width: NODE_WIDTH,
     height: NODE_HEIGHT,
   });
+
+  const [simpleExplanation, setSimpleExplanation] = useState<string | null>(null);
+  const [isGettingExplanation, setIsGettingExplanation] = useState(false);
+  const [showExplanationModal, setShowExplanationModal] = useState(false);
+
 
   const generateId = () => `id_${new Date().getTime()}_${Math.random().toString(36).substr(2, 9)}`;
 
@@ -212,9 +218,20 @@ const App: React.FC = () => {
     }
   }, [nodes]); 
 
+  const handleGetSimpleExplanation = useCallback(async () => {
+    setIsGettingExplanation(true);
+    setSimpleExplanation(null); 
+    setShowExplanationModal(true); 
+    const question = "Explique como a IA funciona em poucas palavras, como se fosse para um leigo.";
+    // The getSimpleAiExplanation service function now handles its own errors and returns a string.
+    const explanation = await getSimpleAiExplanation(question);
+    setSimpleExplanation(explanation);
+    setIsGettingExplanation(false);
+  }, []);
+
   const shouldShowAiPanel = process.env.API_KEY && !aiPanelUserHidden && 
                            (isAnalyzing || !!aiError || aiSuggestions.length > 0 || 
-                            (!isAnalyzing && !aiError && aiSuggestions.length === 0) 
+                            (!isAnalyzing && !aiError && aiSuggestions.length === 0 && nodes.some(n => n.type === NodeType.UDE))
                            );
 
   return (
@@ -230,6 +247,8 @@ const App: React.FC = () => {
         selectedNodeId={selectedNodeId}
         onOpenPdfConfigModal={handleOpenPdfConfigModal}
         hasAnyNodes={nodes.length > 0}
+        onGetSimpleExplanation={handleGetSimpleExplanation}
+        isGettingExplanation={isGettingExplanation}
       />
       <div className="flex flex-1 overflow-hidden flex-col md:flex-row">
         <div className="flex-1 relative">
@@ -265,11 +284,17 @@ const App: React.FC = () => {
               {isAnalyzing && <p className="text-purple-300 animate-pulse">Analisando EIs, por favor aguarde...</p>}
               {aiError && <p className="text-red-400 bg-red-900 p-2 rounded-md text-sm">{aiError}</p>}
               
-              {!isAnalyzing && !aiError && aiSuggestions.length === 0 && (
+              {!isAnalyzing && !aiError && aiSuggestions.length === 0 && nodes.some(n => n.type === NodeType.UDE) && (
                  <p className="text-sm text-gray-400 italic">
                    Aguardando análise ou nenhuma sugestão no momento. Clique em 'Analisar EIs com IA' para obter sugestões.
                  </p>
               )}
+               {!isAnalyzing && !aiError && aiSuggestions.length === 0 && !nodes.some(n => n.type === NodeType.UDE) && (
+                 <p className="text-sm text-gray-400 italic">
+                   Adicione Efeitos Indesejáveis (EIs) e clique em 'Analisar EIs com IA' para obter sugestões.
+                 </p>
+              )}
+
 
               {aiSuggestions.length > 0 && !isAnalyzing && (
                 <div>
@@ -306,6 +331,40 @@ const App: React.FC = () => {
         initialConfig={pdfConfig}
         onConfigChange={setPdfConfig}
       />
+      {showExplanationModal && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="explanation-modal-title"
+          onClick={() => setShowExplanationModal(false)} 
+        >
+          <div 
+            className="bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-lg text-white border border-gray-700"
+            onClick={(e) => e.stopPropagation()} 
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h3 id="explanation-modal-title" className="text-xl font-semibold text-purple-300">Explicação da IA</h3>
+              <button 
+                onClick={() => setShowExplanationModal(false)} 
+                className="text-gray-400 hover:text-white"
+                aria-label="Fechar modal de explicação"
+              >
+                <CloseIcon className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="max-h-[60vh] overflow-y-auto pr-2 text-gray-200">
+              {isGettingExplanation && <p className="text-purple-300 animate-pulse">Carregando explicação...</p>}
+              {!isGettingExplanation && simpleExplanation && (
+                <p className="text-sm whitespace-pre-wrap">{simpleExplanation}</p>
+              )}
+              {!isGettingExplanation && !simpleExplanation && (
+                 <p className="text-sm text-gray-400 italic">Nenhuma explicação disponível ou ocorreu um erro.</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
        <footer className="bg-gray-900 text-center text-xs text-gray-400 p-2">
         Construtor de Árvore da Realidade Atual (ARA) - Teoria das Restrições (TOC)
       </footer>
